@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install --omit=dev"
+
+[deploy]
+startCommand = "npm start"
+
+[[services]]
+name = "web"
+protocol = "http"
+internal_port = 3000
