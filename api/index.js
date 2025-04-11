@@ -171,9 +171,18 @@ app.get('/api/health', (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000; // Ensure PORT is used
-app.listen(PORT, '0.0.0.0', () => {
+const PORT = process.env.PORT || 8080; // Ensure PORT is used
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+// Handle SIGTERM
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Closing the server...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
 
 module.exports = app;
