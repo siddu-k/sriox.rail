@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Deployment Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Deploy Your Static Site</h1>
+        <div class="deploy-form">
+            <form id="deployForm">
+                <div class="form-group">
+                    <label for="subdomain">Subdomain</label>
+                    <div class="input-group">
+                        <input type="text" 
+                               id="subdomain" 
+                               name="subdomain" 
+                               required 
+                               pattern="[a-z0-9][a-z0-9-]{1,61}[a-z0-9]"
+                               placeholder="your-site">
+                        <span class="domain-suffix">.sriox.com</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>ZIP File</label>
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-prompt">
+                            <p>Drag & drop your ZIP file here or click to browse</p>
+                            <p class="small">Must contain index.html (max 50MB)</p>
+                        </div>
+                        <input type="file" id="fileInput" name="zip" accept=".zip" hidden>
+                    </div>
+                </div>
+
+                <div id="progressContainer" class="progress-container" hidden>
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                    Deploy Site
+                </button>
+            </form>
+        </div>
+
+        <div id="result" class="result" hidden>
+            <div id="successMessage" class="message success" hidden>
+                <h3>🎉 Deployment Successful!</h3>
+                <p>Your site will be available at: <a href="#" id="siteUrl" target="_blank"></a></p>
+                <p class="github-link">View on GitHub: <a href="#" id="githubUrl" target="_blank"></a></p>
+                <p class="note">Note: It may take a few minutes for DNS changes to propagate.</p>
+            </div>
+            <div id="errorMessage" class="message error" hidden>
+                <h3>❌ Deployment Failed</h3>
+                <p id="errorText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('deployForm');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const result = document.getElementById('result');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const siteUrl = document.getElementById('siteUrl');
+            const githubUrl = document.getElementById('githubUrl');
+            const errorText = document.getElementById('errorText');
+
+            // Handle drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('active');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('active');
+                });
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'application/zip') {
+                    fileInput.files = e.dataTransfer.files;
+                    updateSubmitButton();
+                }
+            });
+
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', updateSubmitButton);
+            document.getElementById('subdomain').addEventListener('input', updateSubmitButton);
+
+            function updateSubmitButton() {
+                const hasFile = fileInput.files.length > 0;
+                const hasSubdomain = document.getElementById('subdomain').value.length > 0;
+                submitBtn.disabled = !(hasFile && hasSubdomain);
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                
+                // Reset UI
+                result.hidden = true;
+                successMessage.hidden = true;
+                errorMessage.hidden = true;
+                progressContainer.hidden = false;
+                submitBtn.disabled = true;
+
+                try {
+                    const xhr = new XMLHttpRequest();
+                    
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentComplete = Math.round((event.loaded / event.total) * 100);
+                            progressBar.style.width = percentComplete + '%';
+                            progressText.textContent = percentComplete + '%';
+                        }
+                    };
+
+                    const response = await new Promise((resolve, reject) => {
+                        xhr.onload = () => {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                resolve(JSON.parse(xhr.responseText));
+                            } else {
+                                reject(new Error(xhr.responseText));
+                            }
+                        };
+                        xhr.onerror = () => reject(new Error('Network error'));
+                        xhr.open('POST', '/api/deploy');
+                        xhr.send(formData);
+                    });
+
+                    if (response.success) {
+                        siteUrl.href = response.url;
+                        siteUrl.textContent = response.url;
+                        githubUrl.href = response.github_url;
+                        githubUrl.textContent = response.github_url;
+                        successMessage.hidden = false;
+                    } else {
+                        throw new Error(response.error);
+                    }
+                } catch (error) {
+                    errorText.textContent = error.message;
+                    errorMessage.hidden = false;
+                } finally {
+                    result.hidden = false;
+                    progressContainer.hidden = true;
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

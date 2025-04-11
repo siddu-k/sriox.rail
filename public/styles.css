@@ -1,0 +1,180 @@
+:root {
+    --primary-color: #0366d6;
+    --error-color: #cb2431;
+    --success-color: #28a745;
+    --border-color: #e1e4e8;
+    --text-color: #24292e;
+    --bg-color: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: #f6f8fa;
+}
+
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+h1 {
+    margin-bottom: 2rem;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+}
+
+.domain-suffix {
+    padding: 0.75rem;
+    background-color: #f6f8fa;
+    color: #666;
+    border-left: 1px solid var(--border-color);
+}
+
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 6px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.drop-zone:hover,
+.drop-zone.active {
+    border-color: var(--primary-color);
+    background-color: rgba(3, 102, 214, 0.05);
+}
+
+.drop-zone-prompt {
+    color: #666;
+}
+
+.small {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    color: #666;
+}
+
+.progress-container {
+    margin: 1rem 0;
+}
+
+.progress {
+    height: 8px;
+    background-color: #f6f8fa;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:disabled {
+    background-color: #959da5;
+    cursor: not-allowed;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background-color: #0351a8;
+}
+
+.result {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.message.success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid var(--success-color);
+}
+
+.message.error {
+    background-color: rgba(203, 36, 49, 0.1);
+    border: 1px solid var(--error-color);
+}
+
+.github-link {
+    margin: 1rem 0;
+}
+
+.note {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+}
