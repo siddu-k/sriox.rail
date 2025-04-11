@@ -11,6 +11,18 @@ const settings = require('../upload_settings');
 const app = express();
 app.use(cors());
 
+// Serve static files
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Handle favicon.ico requests
+app.use((req, res, next) => {
+  if (req.url === '/favicon.ico') {
+    res.status(204).end(); // No Content
+  } else {
+    next();
+  }
+});
+
 // Configure multer for memory storage
 const upload = multer({
   limits: {
@@ -30,7 +42,7 @@ const validateSubdomain = (subdomain) => {
   if (!subdomain || typeof subdomain !== 'string') {
     throw new Error('Subdomain is required');
   }
-  
+
   if (!/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/i.test(subdomain)) {
     throw new Error('Invalid subdomain format. Use only letters, numbers, and hyphens');
   }
@@ -48,7 +60,7 @@ const octokit = new Octokit({
 app.post('/api/deploy', upload.single('zip'), async (req, res) => {
   const subdomain = req.body.subdomain?.toLowerCase();
   const tempDir = path.join('/tmp', `${subdomain}-${Date.now()}`);
-  
+
   try {
     // Validate inputs
     validateSubdomain(subdomain);
@@ -86,7 +98,7 @@ app.post('/api/deploy', upload.single('zip'), async (req, res) => {
 
     // Create default branch
     const defaultBranch = 'main';
-    
+
     // Upload files to GitHub
     const files = await fs.readdir(tempDir);
     for (const file of files) {
@@ -156,6 +168,12 @@ app.post('/api/deploy', upload.single('zip'), async (req, res) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 module.exports = app;
